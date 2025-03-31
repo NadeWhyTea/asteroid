@@ -8,3 +8,12 @@ final ButtonStyle returnButtonStyle = ElevatedButton.styleFrom(
     borderRadius: BorderRadius.circular(10),
   ),
 );
+
+final ButtonStyle restartButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.transparent,
+  side: BorderSide(color: Colors.red, width: 2),
+  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(10),
+  ),
+);

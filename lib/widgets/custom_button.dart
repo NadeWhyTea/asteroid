@@ -4,12 +4,14 @@ class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final ButtonStyle? buttonStyle;
+  final TextStyle? textStyle;
 
   const CustomButton({
     super.key,
     required this.text,
     required this.onPressed,
     this.buttonStyle,
+    this.textStyle,
   });
 
   @override
@@ -28,7 +30,8 @@ class CustomButton extends StatelessWidget {
           ),
       child: Text(
         text,
-        style: TextStyle(fontSize: 20, fontFamily: 'Orbitron', color: Colors.green),
+        style: textStyle ??
+            TextStyle(fontSize: 20, fontFamily: 'Orbitron', color: Colors.green),
       ),
     );
   }

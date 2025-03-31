@@ -12,7 +12,7 @@ class LeaderboardScreen extends StatelessWidget {
         children: [
           Positioned.fill(
             child: GifView(
-              image: AssetImage('assets/leaderboardBackground.gif'),
+              image: AssetImage('assets/images/leaderboardBackground.gif'),
               fit: BoxFit.cover,
             ),
           ),
@@ -25,7 +25,7 @@ class LeaderboardScreen extends StatelessWidget {
               onExit:(_){
               },
               child: CustomButton(
-                text: 'Return',
+                text: 'Return to Home',
                 onPressed:()
                 {
                   Navigator.push(

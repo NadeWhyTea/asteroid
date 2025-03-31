@@ -18,7 +18,7 @@ class HomeScreen extends StatelessWidget {
           //GIF Background using gif_view package
           Positioned.fill(
             child: GifView(
-              image: AssetImage('assets/asteroidBackground.gif'),
+              image: AssetImage('assets/images/asteroidBackground.gif'),
               fit: BoxFit.cover,
             ),
 
