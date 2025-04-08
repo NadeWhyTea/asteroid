@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import '../widgets/lives_tracker.dart';
 import '../screens/game_over.dart';
 import 'package:firebase_database/firebase_database.dart';
+import '../screens/game_screen.dart';
 
 class AsteroidGame extends FlameGame with KeyboardEvents{
   final BuildContext context;
@@ -141,12 +142,17 @@ class AsteroidGame extends FlameGame with KeyboardEvents{
     _asteroidTimer.stop();
 
     // Navigate to GameOverScreen with the player's time and a callback
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => GameOverScreen(
           onSubmitScore: _submitBestTime,
-          onRestart: restartGame,
+          onRestart: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => GameScreen()),
+            );
+          },
           timeSurvived: _elapsedTime,
         ),
       ),
@@ -165,7 +171,6 @@ class AsteroidGame extends FlameGame with KeyboardEvents{
 
     print("Best time submitted to Firebase: ${_elapsedTime.toStringAsFixed(2)} seconds");
   }
-
 
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed){
