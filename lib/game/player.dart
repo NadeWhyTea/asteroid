@@ -94,7 +94,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     _movePlayer();
     _updateCollisionCooldown(dt);
 
-    const double rotationSpeed = 25.0;
+    const double rotationSpeed = 17.5;
     double diff = _targetAngle - angle;
     diff = (diff + Math.pi) % (2 * Math.pi) - Math.pi;
     angle += diff * rotationSpeed * dt;

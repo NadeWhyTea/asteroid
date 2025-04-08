@@ -62,7 +62,7 @@ class _GameScreenState extends State<GameScreen> {
               child: CustomButton(
                 text: 'Return to Home',
                 onPressed: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) => HomeScreen(title: 'Asteroid Game Home Screen'),
