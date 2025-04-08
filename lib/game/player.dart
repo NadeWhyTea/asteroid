@@ -12,7 +12,7 @@ import '../screens/game_over.dart';
 
 class Player extends SpriteComponent with HasGameRef, KeyboardHandler, CollisionCallbacks {
   static bool _hasCollided = false;
-  bool debugMode = true;
+  bool debugMode = false;
 
   static bool get hasCollided => _hasCollided;
   static set hasCollided(bool value) => _hasCollided = value;
@@ -94,8 +94,9 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     _updateCollisionCooldown(dt);
   }
 
-  void _movePlayer()
-  {
+  void _movePlayer() {
+    if ((gameRef as AsteroidGame).isGameOver) return;
+
     double deltaX = 0;
     double deltaY = 0;
 
@@ -132,7 +133,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   }
 
   void checkCollisions(List<Asteroid> asteroids) {
-    if (_hasCollided) return;
+    if (_hasCollided || (gameRef as AsteroidGame).isGameOver) return;
 
     for (Asteroid asteroid in asteroids){
       Vector2 playerCenter = position + Vector2(size.x / 2, size.y / 2);
@@ -155,14 +156,12 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   }
 
   void takeDamage() {
-    int j = 0;
-    if (_hasCollided) return;
+    if (_hasCollided || lives <= 0 || (gameRef as AsteroidGame).isGameOver) return;
 
     _hasCollided = true;
     lives--;
-    j++;
     livesTracker.updateLives(lives);
-    print("Collision! Player lost a life. Lives left: $lives , $j iterations");
+    print("Collision! Player lost a life. Lives left: $lives");
 
     if (lives <= 0) {
       gameOver();
@@ -171,6 +170,11 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
         _hasCollided = false;
       });
     }
+  }
+
+  void resetLives(){
+    lives = 3;
+    livesTracker.updateLives(lives);
   }
 
   void _updateCollisionCooldown(double dt) {

@@ -3,17 +3,30 @@ import 'package:flame/flame.dart';
 
 class LivesTracker extends PositionComponent with HasGameRef {
   late int lives;
-  List<SpriteComponent> hearts = [];
+  List<SpriteAnimationComponent> hearts = [];
 
   LivesTracker({required this.lives});
 
   @override
   Future<void> onLoad() async {
-    final heartSprite = await Sprite.load('sprites/pixel-heart.gif');
+    final heartSprite = await Flame.images.load(
+        'sprites/pixel-heart-spritesheet.png');
+
+      final animation = SpriteAnimation.fromFrameData(
+        heartSprite,
+        SpriteAnimationData.sequenced(
+          amount: 6,
+          stepTime: 0.1,
+          textureSize:Vector2(200,200),
+      )
+    );
 
     for (int i = 0; i < lives; i++) {
-      var heart = SpriteComponent(sprite: heartSprite, size: Vector2(50, 50));
-      heart.position = Vector2 ((i * 50) + 1750, 20);
+      var heart = SpriteAnimationComponent(
+          animation: animation,
+          size: Vector2(75, 75),
+          position: Vector2 ((i * 75) + 1675, 20),
+      );
       hearts.add(heart);
       add(heart);
     }

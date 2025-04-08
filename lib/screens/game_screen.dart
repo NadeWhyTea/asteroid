@@ -5,23 +5,39 @@ import '../styles/button_styles.dart';
 import 'package:flame/game.dart';
 import '../game/asteroid_game.dart';
 
-class GameScreen extends StatelessWidget {
-  final FocusNode _focusNode = FocusNode();
+class GameScreen extends StatefulWidget {
+  @override
+  _GameScreenState createState() => _GameScreenState();
+}
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+class _GameScreenState extends State<GameScreen> {
+  late AsteroidGame _game;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the game and pass the callback for restart
+    _initializeGame();
+  }
+
+  void _initializeGame() {
+    _game = AsteroidGame(context: context, onRestartGame: _restartGame);
+  }
+
+  // Method to handle restarting the game without recreating the game instance
+  void _restartGame(String playerName) {
+    setState(() {
+      // Simply reset the game logic instead of creating a new game instance
+      _initializeGame();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      body: Focus(
-        focusNode: _focusNode,
-        onFocusChange: (hasFocus){
-        },
-
-      child: Stack(
+      body: Stack(
         children: [
-          // This will render the background GIF first
+          // Background GIF
           Positioned.fill(
             child: Image.asset(
               'assets/images/gameBackground.gif',
@@ -29,14 +45,14 @@ class GameScreen extends StatelessWidget {
             ),
           ),
 
-          // This will render the AsteroidGame on top of the background
+          // The AsteroidGame widget will be placed on top of the background
           Positioned.fill(
             child: GameWidget(
-              game: AsteroidGame(context: context),
-            ),// This will load the AsteroidGame
+              game: _game,
+            ),
           ),
 
-          // Button to return to the home screen
+          // Return to Home button
           Positioned(
             left: 10,
             top: 10,
@@ -58,7 +74,6 @@ class GameScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
       ),
     );
   }

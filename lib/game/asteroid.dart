@@ -1,41 +1,36 @@
 import 'dart:math' as Math;
 import 'dart:ui';
+import 'asteroid_game.dart';
 import 'player.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
-  bool debugMode = true;
+  bool debugMode = false;
   static final Random _random = Random();
+  late PolygonHitbox hitbox; //This under Asteroid() caused hitbox problems
+  Vector2 velocity = Vector2.zero();
 
   Asteroid() : super(size: Vector2(75, 75)) {
     anchor = Anchor.center;
   }
 
-  late PolygonHitbox hitbox;
-
   @override
   Future<void> onLoad() async {
     //print("Loading asteroid sprite...");
     sprite = await gameRef.loadSprite('sprites/asteroid.png');
-    //print("Asteroid sprite loaded successfully!");
-    position = Vector2(
-      _random.nextDouble() * gameRef.size.x,
-      -size.y, //Start off-screen
-    );
 
-    /*if (children
-        .whereType<PolygonHitbox>()
-        .isEmpty) {
-      addOvalHitbox();
-    }*/
+    Vector2 screenSize = gameRef.size;
+    Vector2 spawnPoint = getRandomSpawnPosition(screenSize);
+    position = spawnPoint;
+
+    Vector2 center = screenSize / 2;
+    velocity = (center - position).normalized() * 100;
 
     double semiMajorAxis = size.x / 2;
     double semiMinorAxis = size.y / 2;
-
     List<Vector2> ovalPoints = [];
     int numPoints = 50;
 
@@ -60,10 +55,27 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
     }
   }
 
+  Vector2 getRandomSpawnPosition(Vector2 screenSize) {
+    int side = _random.nextInt(4); // 0: Top, 1: Bottom, 2: Left, 3: Right
+    switch (side){
+      case 0: // Top
+        return Vector2(_random.nextDouble() * screenSize.x, -size.y);
+      case 1: // Bottom
+        return Vector2(_random.nextDouble() * screenSize.x, screenSize.y + size.y);
+      case 2: // Left
+        return Vector2(-size.x, _random.nextDouble() * screenSize.y);
+      case 3:
+      default:
+        return Vector2(screenSize.x + size.x, _random.nextDouble() * screenSize.y);
+    }
+  }
+
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
     if (other is Player) {
+      (gameRef as AsteroidGame).removeAsteroid(this);
+
         removeFromParent();
         print("Asteroid destroyed!");
 
@@ -76,8 +88,10 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
-    position.y += 100 * dt;
-    if (position.y > gameRef.size.y) {
+    position += velocity * dt;
+
+    if (position.x < -size.x || position.x > gameRef.size.x + size.x ||
+        position.y < -size.y || position.y > gameRef.size.y + size.y) {
       removeFromParent(); //Remove if out of bounds
     }
   }
@@ -88,7 +102,6 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
     children.whereType<PolygonHitbox>().forEach((hitbox) {
       hitbox.removeFromParent();
     });
-    print("Asteroid and hitbox removed!");
   }
 
   @override

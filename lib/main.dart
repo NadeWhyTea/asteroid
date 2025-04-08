@@ -1,13 +1,31 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'screens/home_screen.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    // Explicitly provide the FirebaseOptions
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: "AIzaSyDi0WI9I8JldV_YchUF5sDVOG_TBed-tSE",
+        appId: "1:465162584247:android:9078794e0ecaf6b4960d32",
+        messagingSenderId: "465162584247",
+        projectId: "asteroidsdb",
+        databaseURL: "https://asteroidsdb-default-rtdb.firebaseio.com/", // Optional, for Realtime Database
+      ),
+    );
+    runApp(MyApp());
+  } catch (e) {
+    print('Error initializing Firebase: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,5 +37,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
