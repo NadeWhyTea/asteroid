@@ -34,6 +34,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   late CircleHitbox playerHitbox;
 
   double hitboxRadius = 0.0;
+  double _targetAngle = 0.0;
 
   @override
   Future<void> onLoad() async {
@@ -92,6 +93,11 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
 
     _movePlayer();
     _updateCollisionCooldown(dt);
+
+    const double rotationSpeed = 25.0;
+    double diff = _targetAngle - angle;
+    diff = (diff + Math.pi) % (2 * Math.pi) - Math.pi;
+    angle += diff * rotationSpeed * dt;
   }
 
   void _movePlayer() {
@@ -100,19 +106,23 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     double deltaX = 0;
     double deltaY = 0;
 
-    if (_keyStates[LogicalKeyboardKey.arrowLeft] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowLeft] == true ||
+        _keyStates[LogicalKeyboardKey.keyA] == true) {
       //print("Arrow Left Pressed");
       deltaX -= moveSpeed;
     }
-    if (_keyStates[LogicalKeyboardKey.arrowRight] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowRight] == true ||
+        _keyStates[LogicalKeyboardKey.keyD] == true) {
       //print("Arrow Right Pressed");
       deltaX += moveSpeed;
     }
-    if (_keyStates[LogicalKeyboardKey.arrowUp] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowUp] == true ||
+    _keyStates[LogicalKeyboardKey.keyW] == true) {
       //print("Arrow Up Pressed");
       deltaY -= moveSpeed;
     }
-    if (_keyStates[LogicalKeyboardKey.arrowDown] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowDown] == true ||
+        _keyStates[LogicalKeyboardKey.keyS] == true) {
       //print("Arrow Down Pressed");
       deltaY += moveSpeed;
     }
@@ -124,11 +134,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     //print("deltaX is: $deltaY");
 
     if (deltaX != 0 || deltaY != 0){
-      double angle = Math.atan2(deltaY, deltaX);
-
-      angle += Math.pi / 2;
-
-      this.angle = angle;
+      _targetAngle = Math.atan2(deltaY, deltaX) + Math.pi / 2;
     }
   }
 
