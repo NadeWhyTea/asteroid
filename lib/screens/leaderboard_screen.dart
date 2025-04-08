@@ -102,82 +102,61 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               final leaderboard = snapshot.data!;
 
               return Center(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withAlpha(178),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Leaderboard",
-                        style: TextStyle(
-                          fontSize: 28,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: const [
-                          Expanded(
-                              flex: 1,
-                              child: Text(
-                                "Rank",
-                                style: TextStyle(color: Colors.white),
-                              )),
-                          Expanded(
-                              flex: 3,
-                              child: Text(
-                                "Name",
-                                style: TextStyle(color: Colors.white),
-                              )),
-                          Expanded(
-                              flex: 2,
-                              child: Text(
-                                "Time (s)",
-                                style: TextStyle(color: Colors.white),
-                              )),
-                        ],
-                      ),
-                      const Divider(color: Colors.white),
-                      ...leaderboard.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final data = entry.value;
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Text(
-                                  "${index + 1}",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: Text(
-                                  data['name'],
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  data['time'].toStringAsFixed(2),
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 400), // Adjust width as needed
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(178),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Leaderboard",
+                          style: TextStyle(
+                            fontSize: 28,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
-                        );
-                      }),
-                    ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: const [
+                            Expanded(flex: 1, child: Text("Rank", style: TextStyle(color: Colors.white))),
+                            Expanded(flex: 3, child: Text("Name", style: TextStyle(color: Colors.white))),
+                            Expanded(flex: 2, child: Text("Time (s)", style: TextStyle(color: Colors.white))),
+                          ],
+                        ),
+                        const Divider(color: Colors.white),
+                        ...leaderboard.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final data = entry.value;
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: Text("${index + 1}", style: TextStyle(color: Colors.white)),
+                                ),
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(data['name'], style: TextStyle(color: Colors.white)),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(data['time'].toStringAsFixed(2), style: TextStyle(color: Colors.white)),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
                   ),
                 ),
               );
