@@ -42,7 +42,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   double _targetAngle = 0.0;
 
   // Rotation speed for user input
-  final double rotationSpeed = 7.0;
+  late double rotationSpeed = 15.0;
 
   // Drift-related variables
   double _driftAngle = 0.0; // Keeps track of drift direction when input stops
@@ -156,15 +156,18 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   void _handleRotation(double dt) {
     // Skip angle update if no input or no movement
     if (velocity.length == 0 || !_keyStates.containsValue(true)) {
-      // Continue drifting in the last direction for a brief time after input stops
-      if (_driftAngle != 0) {
-        double diff = _driftAngle - angle;
-        diff = (diff + Math.pi) % (2 * Math.pi) - Math.pi; // Keep angle within [-π, π]
+      if (_driftAngle != null) {
+        // Compute shortest angle difference
+        double diff = (_driftAngle - angle + Math.pi) % (2 * Math.pi) - Math.pi;
 
-        double driftDecayFactor = 0.5; // Increased decay factor to stop drifting quicker
-        _driftAngle -= Math.sin(diff) * Math.min(driftSpeed * dt, diff.abs()) * driftDecayFactor;
+        double driftDecayFactor = 0.5;
+        double rotationStep = driftSpeed * dt * driftDecayFactor;
 
-        angle += Math.sin(diff) * Math.min(driftSpeed * dt, diff.abs()); // Rotate with drift speed
+        if (diff.abs() < rotationStep) {
+          angle = _driftAngle; // Snap to drift angle
+        } else {
+          angle += rotationStep * (diff > 0 ? 1 : -1); // Rotate toward drift angle
+        }
       }
       return;
     }
@@ -172,7 +175,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     Vector2 input = Vector2.zero();
     bool hasInput = false;
 
-    // Process user input to update target angle
+    // Capture input
     if (_keyStates[LogicalKeyboardKey.arrowLeft] == true || _keyStates[LogicalKeyboardKey.keyA] == true) {
       input.x -= 1;
       hasInput = true;
@@ -194,22 +197,31 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
       input.normalize();
       _targetAngle = Math.atan2(input.y, input.x) + Math.pi / 2;
 
-      // Reset drift angle immediately when input is active
-      _driftAngle = _targetAngle;
+      if (_driftAngle != null) {
+        double diff = (_targetAngle - _driftAngle + Math.pi) % (2 * Math.pi) - Math.pi;
+
+        if (diff.abs() > 2.8) {
+          rotationSpeed = 20.0; // Sharp direction change
+        } else {
+          rotationSpeed = 7.0;
+        }
+      }
+
+      // Update drift angle to new input direction only when moving
+      if (velocity.length > 0) {
+        _driftAngle = _targetAngle;
+      }
     }
 
-    double diff = _targetAngle - angle;
-    diff = (diff + Math.pi) % (2 * Math.pi) - Math.pi; // Keep angle within [-π, π]
+    double diff = (_targetAngle - angle + Math.pi) % (2 * Math.pi) - Math.pi;
 
     double rotationStep = rotationSpeed * dt;
-
-    // Apply rotation smoothing
     double angleDifference = diff.abs();
     double rotationMultiplier = Math.min(angleDifference / (Math.pi * 1.66), 1.0);
     rotationStep *= (1 + rotationMultiplier);
 
     if (angleDifference < rotationStep) {
-      angle = _targetAngle;  // Snap to target angle if close
+      angle = _targetAngle;
     } else {
       angle += rotationStep * (diff > 0 ? 1 : -1);
     }
