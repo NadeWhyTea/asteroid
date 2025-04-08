@@ -33,8 +33,11 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
 
   int lives = 3;
 
-  double collisionCooldown = 1.0;
+  double collisionCooldown = 3.0;
   double _collisionTimer = 0.0;
+
+  double _blinkTimer = 0.0;
+  double _blinkInterval = 0.15; // Blink every 0.1 seconds
 
   late CircleHitbox playerHitbox;
 
@@ -42,7 +45,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   double _targetAngle = 0.0;
 
   // Rotation speed for user input
-  late double rotationSpeed = 15.0;
+  late double rotationSpeed = 20.0;
 
   // Drift-related variables
   double _driftAngle = 0.0; // Keeps track of drift direction when input stops
@@ -99,6 +102,18 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     _movePlayerPhysics(dt);
     _updateCollisionCooldown(dt);
     _handleRotation(dt);  // Updated rotation handling
+
+    // Blink when invincible
+    if (_hasCollided) {
+      _blinkTimer += dt;
+      if (_blinkTimer >= _blinkInterval) {
+        _blinkTimer = 0.0;
+        opacity = (opacity == 1.0) ? 0.0 : 1.0;
+      }
+    } else {
+      // Ensure sprite is fully visible when not invincible
+      opacity = 1.0;
+    }
   }
 
   void _movePlayerPhysics(double dt) {
@@ -261,7 +276,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     if (lives <= 0) {
       gameOver();
     } else {
-      Future.delayed(Duration(seconds: 1), () {
+      Future.delayed(Duration(seconds: collisionCooldown.toInt()), () {
         _hasCollided = false;
       });
     }

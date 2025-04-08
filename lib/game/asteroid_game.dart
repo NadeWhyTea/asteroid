@@ -57,6 +57,7 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
       livesTracker: livesTracker,
       onGameOver: _handleGameOver,
     );
+    Player.hasCollided = false;
     await add(player);
 
     // Set up the timer to spawn asteroids
