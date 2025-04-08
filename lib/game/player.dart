@@ -9,6 +9,7 @@ import 'asteroid.dart';
 import '../widgets/lives_tracker.dart';
 import 'asteroid_game.dart';
 import '../screens/game_over.dart';
+import '../widgets/boundary_box.dart';
 
 class Player extends SpriteComponent with HasGameRef, KeyboardHandler, CollisionCallbacks {
   static bool _hasCollided = false;
@@ -119,7 +120,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
       input.y += 1;
     }
 
-    // Dynamically boost acceleration when there's input
+     // Dynamically boost acceleration when there's input
     double dynamicAcceleration = acceleration;
     if (input.length > 0) {
       dynamicAcceleration *= 1.3;  // You can tweak the 1.2 factor to adjust the boost amount

@@ -10,11 +10,14 @@ import '../widgets/lives_tracker.dart';
 import '../screens/game_over.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../screens/game_screen.dart';
+import '../widgets/boundary_box.dart';
 
-class AsteroidGame extends FlameGame with KeyboardEvents{
+class AsteroidGame extends FlameGame with KeyboardEvents {
   final BuildContext context;
   final void Function(String playerName) onRestartGame;
   bool isGameOver = false;
+
+  late BoundaryBox boundaryBox; // Declare boundaryBox late, but initialize later
 
   AsteroidGame({required this.context, required this.onRestartGame});
 
@@ -31,24 +34,28 @@ class AsteroidGame extends FlameGame with KeyboardEvents{
 
   final FocusNode _focusNode = FocusNode();
 
+  final double boxMargin = 50.0; // Set your desired margin here
+
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    //debugMode = true;
     _focusNode.requestFocus();
 
     print("onLoad called...");
     await _initializeGame();
+
+    // Initialize the boundary box after game size is set
+    _initializeBoundaryBox();
   }
 
   Future<void> _initializeGame() async {
-    livesTracker = LivesTracker(lives : 3);
+    livesTracker = LivesTracker(lives: 3);
     await add(livesTracker);
 
     // Load the player sprite
     player = Player(
-        livesTracker: livesTracker,
-        onGameOver: _handleGameOver,
+      livesTracker: livesTracker,
+      onGameOver: _handleGameOver,
     );
     await add(player);
 
@@ -60,46 +67,58 @@ class AsteroidGame extends FlameGame with KeyboardEvents{
     print("Timer started...");
   }
 
-    @override
-    void update(double dt) {
-      if (isGameOver) return;
+  void _initializeBoundaryBox() {
+    // Initialize boundary box after the size is available
+    boundaryBox = BoundaryBox(margin: boxMargin)
+      ..size = size; // Set the size to match the game area
 
-      super.update(dt);
+    boundaryBox.position = Vector2(0, 0); // Centered, no margin
 
-      //debugMode = true;
-      //print("Game updating... dt: $dt");
+    add(boundaryBox);  // Add the boundary box to the game
+  }
 
-      // Update the timer
-      _elapsedTime += dt;
-      _asteroidTimer.update(dt);
-      //print("Timer current: ${_asteroidTimer.current}");
+  @override
+  void update(double dt) {
+    if (isGameOver) return;
 
-      if (_asteroidTimer.finished) {
-        //print("Timer finished. Spawning asteroid...");
-        // Spawn an asteroid if the timer is finished
-        _spawnAsteroid();
-        _asteroidTimer.start();
-      }
+    super.update(dt);
 
-      for (Asteroid asteroid in asteroids){
-        asteroid.update(dt);
-      }
-
-      player.checkCollisions(asteroids);
-
-      livesTracker.updateLives(player.lives);
+    // Ensure boundaryBox is properly initialized before using
+    if (boundaryBox.size == Vector2.zero()) {
+      return; // If the boundary box size is not set, do nothing
     }
 
+    // Get the boundary rectangle from the boundary box
+    Rect boundaryRect = boundaryBox.boundaryRect;
+
+    // Clamp the player's position to stay within the boundary rectangle
+    player.position.x = player.position.x.clamp(boundaryRect.left, boundaryRect.right);
+    player.position.y = player.position.y.clamp(boundaryRect.top, boundaryRect.bottom);
+
+    // Update the timer
+    _elapsedTime += dt;
+    _asteroidTimer.update(dt);
+
+    if (_asteroidTimer.finished) {
+      _spawnAsteroid();
+      _asteroidTimer.start();
+    }
+
+    for (Asteroid asteroid in asteroids) {
+      asteroid.update(dt);
+    }
+
+    player.checkCollisions(asteroids);
+    livesTracker.updateLives(player.lives);
+  }
 
   void _spawnAsteroid() {
-    //print("Spawning asteroid...");
-    // Add an asteroid to the game
     Asteroid asteroid = Asteroid();
     add(asteroid);
     asteroids.add(asteroid);
   }
 
-  void removeAsteroid(Asteroid asteroid){
+  void removeAsteroid(Asteroid asteroid) {
     asteroids.remove(asteroid);
     remove(asteroid);
   }
@@ -111,7 +130,7 @@ class AsteroidGame extends FlameGame with KeyboardEvents{
     _asteroidTimer.start();
     print("Timer reset...");
 
-    print("Clearing asteroids...");
+    // Clear asteroids
     for (final asteroid in asteroids) {
       if (contains(asteroid)) {
         remove(asteroid);
@@ -165,7 +184,7 @@ class AsteroidGame extends FlameGame with KeyboardEvents{
     DatabaseReference dbRef = FirebaseDatabase.instance.ref().child('leaderboard');
 
     await dbRef.push().set({
-      'name': playerName, // Use player input
+      'name': playerName,
       'time': double.parse(_elapsedTime.toStringAsFixed(2)),
     });
 
@@ -173,8 +192,8 @@ class AsteroidGame extends FlameGame with KeyboardEvents{
   }
 
   @override
-  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed){
-    if (player.onKeyEvent(event, keysPressed)){
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    if (player.onKeyEvent(event, keysPressed)) {
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
