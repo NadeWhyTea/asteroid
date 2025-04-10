@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "465162584247",
+    "project_id": "asteroidsdb",
+    "storage_bucket": "asteroidsdb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:465162584247:android:9078794e0ecaf6b4960d32",
+        "android_client_info": {
+          "package_name": "com.astrolyte.demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDi0WI9I8JldV_YchUF5sDVOG_TBed-tSE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
