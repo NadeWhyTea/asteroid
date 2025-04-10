@@ -18,23 +18,21 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
   bool isGameOver = false;
 
   late BoundaryBox boundaryBox; // Declare boundaryBox late, but initialize later
+  late Player player;
+  late Timer _asteroidTimer;
+  late LivesTracker livesTracker;
+  late TextComponent elapsedTimeText;
+
+  double _elapsedTime = 0;
+  List<Asteroid> asteroids = [];
+
+  final FocusNode _focusNode = FocusNode();
+  final double boxMargin = 50.0; // Set your desired margin here
 
   AsteroidGame({required this.context, required this.onRestartGame});
 
   @override
   Color backgroundColor() => Colors.transparent;
-
-  late Player player;
-  late Timer _asteroidTimer;
-  late LivesTracker livesTracker;
-
-  double _elapsedTime = 0;
-
-  List<Asteroid> asteroids = [];
-
-  final FocusNode _focusNode = FocusNode();
-
-  final double boxMargin = 50.0; // Set your desired margin here
 
   @override
   Future<void> onLoad() async {
@@ -46,6 +44,19 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
 
     // Initialize the boundary box after game size is set
     _initializeBoundaryBox();
+
+    elapsedTimeText = TextComponent(
+      text: 'Time: 0.00s',
+      position: Vector2(900,10),
+      textRenderer: TextPaint(
+        style: TextStyle(
+          color: Colors.white,
+          fontFamily: 'Orbitron',
+          fontSize: 24,
+        ),
+      ),
+    );
+    add(elapsedTimeText);
   }
 
   Future<void> _initializeGame() async {
@@ -99,6 +110,8 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
     // Update the timer
     _elapsedTime += dt;
     _asteroidTimer.update(dt);
+
+    elapsedTimeText.text = 'Time: ${_elapsedTime.toStringAsFixed(2)}s';
 
     if (_asteroidTimer.finished) {
       _spawnAsteroid();
