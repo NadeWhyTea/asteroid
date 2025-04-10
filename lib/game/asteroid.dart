@@ -1,5 +1,6 @@
 import 'dart:math' as Math;
 import 'dart:ui';
+import '../widgets/boundary_box.dart';
 import 'asteroid_game.dart';
 import 'player.dart';
 import 'package:flame/collisions.dart';
@@ -12,6 +13,7 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
   static final Random _random = Random();
   late PolygonHitbox hitbox; //This under Asteroid() caused hitbox problems
   Vector2 velocity = Vector2.zero();
+  late Vector2 targetPoint;
 
   Asteroid() : super(size: Vector2(75, 75)) {
     anchor = Anchor.center;
@@ -26,8 +28,12 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
     Vector2 spawnPoint = getRandomSpawnPosition(screenSize);
     position = spawnPoint;
 
-    Vector2 center = screenSize / 2;
-    velocity = (center - position).normalized() * 100;
+    BoundaryBox boundaryBox = gameRef.children.firstWhere(
+            (child) => child is BoundaryBox) as BoundaryBox;
+    
+    targetPoint = getRandomPointWithinBoundary(boundaryBox);
+
+    velocity = (targetPoint - position).normalized() * 100;
 
     double semiMajorAxis = size.x / 2;
     double semiMinorAxis = size.y / 2;
@@ -68,6 +74,16 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
       default:
         return Vector2(screenSize.x + size.x, _random.nextDouble() * screenSize.y);
     }
+  }
+
+  Vector2 getRandomPointWithinBoundary(BoundaryBox boundaryBox) {
+    Rect boundaryRect = boundaryBox.boundaryRect; // Get the boundary rectangle
+
+    // Generate a random point within the boundary rectangle
+    double randomX = _random.nextDouble() * boundaryRect.width + boundaryRect.left;
+    double randomY = _random.nextDouble() * boundaryRect.height + boundaryRect.top;
+
+    return Vector2(randomX, randomY);
   }
 
   @override
