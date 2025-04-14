@@ -65,6 +65,7 @@ flutter:
     - assets/images/leaderboardBackground.gif
     - assets/images/gameBackground.gif
     - assets/images/gameOverBackground.gif
+    - assets/images/sprites/slash_spritesheet.png
 
   fonts:
     - family: Orbitron

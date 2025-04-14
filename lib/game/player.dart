@@ -10,6 +10,7 @@ import '../widgets/lives_tracker.dart';
 import 'asteroid_game.dart';
 import '../screens/game_over.dart';
 import '../widgets/boundary_box.dart';
+import '../abilities/slash.dart';
 
 class Player extends SpriteComponent with HasGameRef, KeyboardHandler, CollisionCallbacks {
   static bool _hasCollided = false;
@@ -95,6 +96,11 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event is KeyDownEvent) {
       _keyStates[event.logicalKey] = true;
+
+      if (event.logicalKey == LogicalKeyboardKey.space) {
+        performSlash();
+        return true; // Mark event as handled
+      }
     } else if (event is KeyUpEvent) {
       _keyStates[event.logicalKey] = false;
     }
@@ -295,6 +301,17 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
         _hasCollided = false;
       });
     }
+  }
+
+  void performSlash() {
+    final slash = Slash(
+      playerPosition: position,
+      playerSize: size,
+      playerAngle: angle,
+      playerVelocity: velocity,
+    );
+    print('Slash created at: $position with angle: $angle');  // Debugging line
+    gameRef.add(slash);
   }
 
   void resetLives() {

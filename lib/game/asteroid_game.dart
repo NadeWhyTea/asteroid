@@ -11,6 +11,7 @@ import '../screens/game_over.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../screens/game_screen.dart';
 import '../widgets/boundary_box.dart';
+import '../widgets/asteroid_counter.dart';
 
 class AsteroidGame extends FlameGame with KeyboardEvents {
   final BuildContext context;
@@ -27,6 +28,7 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
   late Timer _asteroidTimer;
   late LivesTracker livesTracker;
   late TextComponent elapsedTimeText;
+  late AsteroidCounter asteroidCounter;
 
   double _elapsedTime = 0;
   List<Asteroid> asteroids = [];
@@ -58,6 +60,9 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
       ),
     );
     add(elapsedTimeText);
+
+    asteroidCounter = AsteroidCounter();
+    add(asteroidCounter);
   }
 
   Future<void> _initializeGame() async {
@@ -115,6 +120,8 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
 
     player.checkCollisions(asteroids);
     livesTracker.updateLives(player.lives);
+
+    updateAsteroidCounter(asteroids.length);
   }
 
   void _spawnAsteroid() {
@@ -126,6 +133,10 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
     // Adjust the timer with the updated spawn interval
     _asteroidTimer = Timer(spawnInterval, repeat: true, onTick: _spawnAsteroid);
     _asteroidTimer.start();
+  }
+
+  void updateAsteroidCounter(int count) {
+    asteroidCounter.updateCounter(count);
   }
 
   void removeAsteroid(Asteroid asteroid) {

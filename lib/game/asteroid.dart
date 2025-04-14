@@ -30,7 +30,7 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
 
     BoundaryBox boundaryBox = gameRef.children.firstWhere(
             (child) => child is BoundaryBox) as BoundaryBox;
-    
+
     targetPoint = getRandomPointWithinBoundary(boundaryBox);
 
     velocity = (targetPoint - position).normalized() * 100;
@@ -52,27 +52,30 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
     hitbox = (PolygonHitbox(ovalPoints, position: Vector2.zero()));
     add(hitbox);
 
-    if (debugMode){
-    add(CircleComponent(
-      radius: Math.min(size.x, size.y) / 2,
-      position: Vector2.zero(),
-      paint: Paint()..color = Color(0x55FF0000),
-    ));
+    if (debugMode) {
+      add(CircleComponent(
+        radius: Math.min(size.x, size.y) / 2,
+        position: Vector2.zero(),
+        paint: Paint()
+          ..color = Color(0x55FF0000),
+      ));
     }
   }
 
   Vector2 getRandomSpawnPosition(Vector2 screenSize) {
     int side = _random.nextInt(4); // 0: Top, 1: Bottom, 2: Left, 3: Right
-    switch (side){
+    switch (side) {
       case 0: // Top
         return Vector2(_random.nextDouble() * screenSize.x, -size.y);
       case 1: // Bottom
-        return Vector2(_random.nextDouble() * screenSize.x, screenSize.y + size.y);
+        return Vector2(
+            _random.nextDouble() * screenSize.x, screenSize.y + size.y);
       case 2: // Left
         return Vector2(-size.x, _random.nextDouble() * screenSize.y);
       case 3:
       default:
-        return Vector2(screenSize.x + size.x, _random.nextDouble() * screenSize.y);
+        return Vector2(
+            screenSize.x + size.x, _random.nextDouble() * screenSize.y);
     }
   }
 
@@ -80,8 +83,10 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
     Rect boundaryRect = boundaryBox.boundaryRect; // Get the boundary rectangle
 
     // Generate a random point within the boundary rectangle
-    double randomX = _random.nextDouble() * boundaryRect.width + boundaryRect.left;
-    double randomY = _random.nextDouble() * boundaryRect.height + boundaryRect.top;
+    double randomX = _random.nextDouble() * boundaryRect.width +
+        boundaryRect.left;
+    double randomY = _random.nextDouble() * boundaryRect.height +
+        boundaryRect.top;
 
     return Vector2(randomX, randomY);
   }
@@ -92,12 +97,12 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
     if (other is Player) {
       (gameRef as AsteroidGame).removeAsteroid(this);
 
-        removeFromParent();
-        print("Asteroid destroyed!");
+      removeFromParent();
+      print("Asteroid destroyed!");
 
-        children.whereType<PolygonHitbox>().forEach((hitbox) {
-          hitbox.removeFromParent();
-        });
+      children.whereType<PolygonHitbox>().forEach((hitbox) {
+        hitbox.removeFromParent();
+      });
     }
   }
 
@@ -118,11 +123,15 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
     children.whereType<PolygonHitbox>().forEach((hitbox) {
       hitbox.removeFromParent();
     });
-  }
 
-  @override
-  Rect toRect() {
-    return Rect.fromLTWH(position.x, position.y, size.x, size.y);
+    if (gameRef is AsteroidGame) {
+      (gameRef as AsteroidGame).removeAsteroid(this);
+    }
+
+    @override
+    Rect toRect() {
+      return Rect.fromLTWH(position.x, position.y, size.x, size.y);
+    }
   }
 }
 
