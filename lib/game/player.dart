@@ -285,6 +285,9 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     livesTracker.updateLives(lives);
     print("Collision! Player lost a life. Lives left: $lives");
 
+    _blinkTimer = 0.0;
+    opacity = 1.0;
+
     if (lives <= 0) {
       gameOver();
     } else {
