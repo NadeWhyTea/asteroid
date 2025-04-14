@@ -20,7 +20,13 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
 
   final VoidCallback onGameOver;
 
-  Player({required this.livesTracker, required this.onGameOver}) : super(size: Vector2(100, 100));
+  final BoundaryBox boundaryBox;
+
+  Player({
+    required this.livesTracker,
+    required this.onGameOver,
+    required this.boundaryBox,
+  }) : super(size: Vector2(100, 100));
 
   final LivesTracker livesTracker;
 
@@ -114,6 +120,12 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
       // Ensure sprite is fully visible when not invincible
       opacity = 1.0;
     }
+
+    final rect = boundaryBox.boundaryRect;
+
+    // Clamp the player's position to stay within the boundary rectangle
+    position.x = position.x.clamp(rect.left, rect.right);
+    position.y = position.y.clamp(rect.top, rect.bottom);
   }
 
   void _movePlayerPhysics(double dt) {

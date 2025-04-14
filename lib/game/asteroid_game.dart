@@ -17,7 +17,12 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
   final void Function(String playerName) onRestartGame;
   bool isGameOver = false;
 
-  late BoundaryBox boundaryBox; // Declare boundaryBox late, but initialize later
+  AsteroidGame({required this.context, required this.onRestartGame});
+
+  @override
+  Color backgroundColor() => Colors.transparent;
+
+  late final BoundaryBox boundaryBox;
   late Player player;
   late Timer _asteroidTimer;
   late LivesTracker livesTracker;
@@ -27,27 +32,23 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
   List<Asteroid> asteroids = [];
 
   final FocusNode _focusNode = FocusNode();
-  final double boxMargin = 50.0; // Set your desired margin here
+  final double boxMargin = 50.0;
 
-  AsteroidGame({required this.context, required this.onRestartGame});
-
-  @override
-  Color backgroundColor() => Colors.transparent;
+  double spawnInterval = 0.25; // Initial interval
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
     _focusNode.requestFocus();
 
+    _initializeBoundaryBox();
+
     print("onLoad called...");
     await _initializeGame();
 
-    // Initialize the boundary box after game size is set
-    _initializeBoundaryBox();
-
     elapsedTimeText = TextComponent(
       text: 'Time: 0.00s',
-      position: Vector2(900,10),
+      position: Vector2(900, 10),
       textRenderer: TextPaint(
         style: TextStyle(
           color: Colors.white,
@@ -67,12 +68,13 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
     player = Player(
       livesTracker: livesTracker,
       onGameOver: _handleGameOver,
+      boundaryBox: boundaryBox,
     );
     Player.hasCollided = false;
     await add(player);
 
     // Set up the timer to spawn asteroids
-    _asteroidTimer = Timer(0.25, repeat: false);
+    _asteroidTimer = Timer(spawnInterval, repeat: true, onTick: _spawnAsteroid);
     _asteroidTimer.start();
 
     _elapsedTime = 0;
@@ -80,13 +82,10 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
   }
 
   void _initializeBoundaryBox() {
-    // Initialize boundary box after the size is available
     boundaryBox = BoundaryBox(margin: boxMargin)
-      ..size = size; // Set the size to match the game area
-
-    boundaryBox.position = Vector2(0, 0); // Centered, no margin
-
-    add(boundaryBox);  // Add the boundary box to the game
+      ..size = size
+      ..position = Vector2(0, 0);
+    add(boundaryBox!);
   }
 
   @override
@@ -95,28 +94,20 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
 
     super.update(dt);
 
-    // Ensure boundaryBox is properly initialized before using
-    if (boundaryBox.size == Vector2.zero()) {
-      return; // If the boundary box size is not set, do nothing
-    }
+    if (boundaryBox == null || boundaryBox!.size == Vector2.zero()) return;
 
-    // Get the boundary rectangle from the boundary box
-    Rect boundaryRect = boundaryBox.boundaryRect;
+    // Update the elapsed time
+    _elapsedTime += dt;
 
-    // Clamp the player's position to stay within the boundary rectangle
-    player.position.x = player.position.x.clamp(boundaryRect.left, boundaryRect.right);
-    player.position.y = player.position.y.clamp(boundaryRect.top, boundaryRect.bottom);
+    // Decrease the spawn interval every 10 seconds (but ensure it does not go below 0.1)
+    spawnInterval = 0.25 - (_elapsedTime / 20) * 0.02;
+    spawnInterval = spawnInterval < 0.1 ? 0.1 : spawnInterval;
 
     // Update the timer
-    _elapsedTime += dt;
     _asteroidTimer.update(dt);
 
+    // Update the elapsed time display
     elapsedTimeText.text = 'Time: ${_elapsedTime.toStringAsFixed(2)}s';
-
-    if (_asteroidTimer.finished) {
-      _spawnAsteroid();
-      _asteroidTimer.start();
-    }
 
     for (Asteroid asteroid in asteroids) {
       asteroid.update(dt);
@@ -127,9 +118,14 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
   }
 
   void _spawnAsteroid() {
+    print("Spawning asteroid...");
     Asteroid asteroid = Asteroid();
     add(asteroid);
     asteroids.add(asteroid);
+
+    // Adjust the timer with the updated spawn interval
+    _asteroidTimer = Timer(spawnInterval, repeat: true, onTick: _spawnAsteroid);
+    _asteroidTimer.start();
   }
 
   void removeAsteroid(Asteroid asteroid) {
@@ -144,7 +140,6 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
     _asteroidTimer.start();
     print("Timer reset...");
 
-    // Clear asteroids
     for (final asteroid in asteroids) {
       if (contains(asteroid)) {
         remove(asteroid);
@@ -174,7 +169,6 @@ class AsteroidGame extends FlameGame with KeyboardEvents {
     isGameOver = true;
     _asteroidTimer.stop();
 
-    // Navigate to GameOverScreen with the player's time and a callback
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

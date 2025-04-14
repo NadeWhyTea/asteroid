@@ -29,6 +29,12 @@ class BoundaryBox extends PositionComponent {
     canvas.drawRect(rect, paint);
   }
 
+  @override
+  void onGameResize(Vector2 gameSize) {
+    super.onGameResize(gameSize);
+    size = gameSize;
+  }
+
   // Expose the boundary rectangle for the player clamping
   Rect get boundaryRect {
     double boxWidth = size.x - margin * 2;
