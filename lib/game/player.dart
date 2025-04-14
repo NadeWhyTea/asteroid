@@ -15,8 +15,12 @@ import '../abilities/slash.dart';
 class Player extends SpriteComponent with HasGameRef, KeyboardHandler, CollisionCallbacks {
   static bool _hasCollided = false;
   bool debugMode = false;
+  Slash? slash;
+
+  late PolygonHitbox slashHitbox;
 
   static bool get hasCollided => _hasCollided;
+
   static set hasCollided(bool value) => _hasCollided = value;
 
   final VoidCallback onGameOver;
@@ -42,6 +46,13 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
 
   double collisionCooldown = 3.0;
   double _collisionTimer = 0.0;
+
+  double slashCooldown = 0.5; // Cooldown in seconds
+  double _slashTimer = 0;
+  bool get canSlash => _slashTimer <= 0;
+
+  late RectangleComponent slashCooldownBar;
+  final Vector2 cooldownBarSize = Vector2(50, 5); // Width & height
 
   double _blinkTimer = 0.0;
   double _blinkInterval = 0.15; // Blink every 0.1 seconds
@@ -83,11 +94,21 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     playerHitbox.position = Vector2(offsetX, offsetY);
     add(playerHitbox);
 
+    slashCooldownBar = RectangleComponent(
+      size: cooldownBarSize,
+      paint: Paint()..color = const Color(0xAAFF0000), // semi-transparent red
+      anchor: Anchor.center,
+      position: Vector2(size.x / 2, size.y + 10), // just below player
+      priority: 99, // Render above player
+    );
+    add(slashCooldownBar);
+
     if (debugMode) {
       add(CircleComponent(
         radius: hitboxRadius,
         position: Vector2(offsetX, offsetY),
-        paint: Paint()..color = Color(0x55FF0000),
+        paint: Paint()
+          ..color = Color(0x55FF0000),
       ));
     }
   }
@@ -113,7 +134,8 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
 
     _movePlayerPhysics(dt);
     _updateCollisionCooldown(dt);
-    _handleRotation(dt);  // Updated rotation handling
+    _handleRotation(dt);
+    // Updated rotation handling
 
     // Blink when invincible
     if (_hasCollided) {
@@ -127,11 +149,27 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
       opacity = 1.0;
     }
 
+    if (_slashTimer > 0) {
+      _slashTimer -= dt;
+      _slashTimer = _slashTimer.clamp(0, slashCooldown);
+    }
+
+    final double ratio = 1.0 - (_slashTimer / slashCooldown);
+    slashCooldownBar.size.x = cooldownBarSize.x * ratio;
+    slashCooldownBar.paint.color = canSlash
+        ? const Color(0xAA00FF00) // green when ready
+        : const Color(0xAAFF0000); // red when on cooldown
+
     final rect = boundaryBox.boundaryRect;
 
     // Clamp the player's position to stay within the boundary rectangle
     position.x = position.x.clamp(rect.left, rect.right);
     position.y = position.y.clamp(rect.top, rect.bottom);
+
+    // Call checkCollisionsWithAsteroids and pass the list of asteroids
+    if (gameRef is AsteroidGame) {
+      final game = gameRef as AsteroidGame;
+    }
   }
 
   void _movePlayerPhysics(double dt) {
@@ -140,23 +178,28 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     Vector2 input = Vector2.zero();
 
     // Check for input to move the ship
-    if (_keyStates[LogicalKeyboardKey.arrowLeft] == true || _keyStates[LogicalKeyboardKey.keyA] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowLeft] == true ||
+        _keyStates[LogicalKeyboardKey.keyA] == true) {
       input.x -= 1;
     }
-    if (_keyStates[LogicalKeyboardKey.arrowRight] == true || _keyStates[LogicalKeyboardKey.keyD] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowRight] == true ||
+        _keyStates[LogicalKeyboardKey.keyD] == true) {
       input.x += 1;
     }
-    if (_keyStates[LogicalKeyboardKey.arrowUp] == true || _keyStates[LogicalKeyboardKey.keyW] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowUp] == true ||
+        _keyStates[LogicalKeyboardKey.keyW] == true) {
       input.y -= 1;
     }
-    if (_keyStates[LogicalKeyboardKey.arrowDown] == true || _keyStates[LogicalKeyboardKey.keyS] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowDown] == true ||
+        _keyStates[LogicalKeyboardKey.keyS] == true) {
       input.y += 1;
     }
 
-     // Dynamically boost acceleration when there's input
+    // Dynamically boost acceleration when there's input
     double dynamicAcceleration = acceleration;
     if (input.length > 0) {
-      dynamicAcceleration *= 1.3;  // You can tweak the 1.2 factor to adjust the boost amount
+      dynamicAcceleration *=
+      1.3; // You can tweak the 1.2 factor to adjust the boost amount
     }
 
     // Smoothly interpolate velocity
@@ -199,7 +242,8 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
         if (diff.abs() < rotationStep) {
           angle = _driftAngle; // Snap to drift angle
         } else {
-          angle += rotationStep * (diff > 0 ? 1 : -1); // Rotate toward drift angle
+          angle +=
+              rotationStep * (diff > 0 ? 1 : -1); // Rotate toward drift angle
         }
       }
       return;
@@ -209,19 +253,23 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     bool hasInput = false;
 
     // Capture input
-    if (_keyStates[LogicalKeyboardKey.arrowLeft] == true || _keyStates[LogicalKeyboardKey.keyA] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowLeft] == true ||
+        _keyStates[LogicalKeyboardKey.keyA] == true) {
       input.x -= 1;
       hasInput = true;
     }
-    if (_keyStates[LogicalKeyboardKey.arrowRight] == true || _keyStates[LogicalKeyboardKey.keyD] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowRight] == true ||
+        _keyStates[LogicalKeyboardKey.keyD] == true) {
       input.x += 1;
       hasInput = true;
     }
-    if (_keyStates[LogicalKeyboardKey.arrowUp] == true || _keyStates[LogicalKeyboardKey.keyW] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowUp] == true ||
+        _keyStates[LogicalKeyboardKey.keyW] == true) {
       input.y -= 1;
       hasInput = true;
     }
-    if (_keyStates[LogicalKeyboardKey.arrowDown] == true || _keyStates[LogicalKeyboardKey.keyS] == true) {
+    if (_keyStates[LogicalKeyboardKey.arrowDown] == true ||
+        _keyStates[LogicalKeyboardKey.keyS] == true) {
       input.y += 1;
       hasInput = true;
     }
@@ -231,7 +279,8 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
       _targetAngle = Math.atan2(input.y, input.x) + Math.pi / 2;
 
       if (_driftAngle != null) {
-        double diff = (_targetAngle - _driftAngle + Math.pi) % (2 * Math.pi) - Math.pi;
+        double diff = (_targetAngle - _driftAngle + Math.pi) % (2 * Math.pi) -
+            Math.pi;
 
         if (diff.abs() > 2.8) {
           rotationSpeed = 20.0; // Sharp direction change
@@ -250,7 +299,8 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
 
     double rotationStep = rotationSpeed * dt;
     double angleDifference = diff.abs();
-    double rotationMultiplier = Math.min(angleDifference / (Math.pi * 1.66), 1.0);
+    double rotationMultiplier = Math.min(
+        angleDifference / (Math.pi * 1.66), 1.0);
     rotationStep *= (1 + rotationMultiplier);
 
     if (angleDifference < rotationStep) {
@@ -265,7 +315,8 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
 
     for (Asteroid asteroid in asteroids) {
       Vector2 playerCenter = position + Vector2(size.x / 2, size.y / 2);
-      Vector2 asteroidCenter = asteroid.position + Vector2(asteroid.size.x / 2, asteroid.size.y / 2);
+      Vector2 asteroidCenter = asteroid.position +
+          Vector2(asteroid.size.x / 2, asteroid.size.y / 2);
 
       double distance = playerCenter.distanceTo(asteroidCenter);
 
@@ -284,7 +335,8 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   }
 
   void takeDamage() {
-    if (_hasCollided || lives <= 0 || (gameRef as AsteroidGame).isGameOver) return;
+    if (_hasCollided || lives <= 0 || (gameRef as AsteroidGame).isGameOver)
+      return;
 
     _hasCollided = true;
     lives--;
@@ -304,13 +356,22 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   }
 
   void performSlash() {
+    if ((gameRef as AsteroidGame).isGameOver) {
+      print("Can't slash, the game is over.");
+      return; // Exit early if the game is over
+    }
+
+    if (!canSlash) return;
+
+    _slashTimer = slashCooldown;
+
     final slash = Slash(
       playerPosition: position,
       playerSize: size,
       playerAngle: angle,
       playerVelocity: velocity,
     );
-    print('Slash created at: $position with angle: $angle');  // Debugging line
+    //print('Slash created at: $position with angle: $angle');  // Debugging line
     gameRef.add(slash);
   }
 

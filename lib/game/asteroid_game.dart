@@ -13,7 +13,7 @@ import '../screens/game_screen.dart';
 import '../widgets/boundary_box.dart';
 import '../widgets/asteroid_counter.dart';
 
-class AsteroidGame extends FlameGame with KeyboardEvents {
+class AsteroidGame extends FlameGame with KeyboardEvents, HasCollisionDetection {
   final BuildContext context;
   final void Function(String playerName) onRestartGame;
   bool isGameOver = false;

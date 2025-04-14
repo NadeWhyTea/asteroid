@@ -7,6 +7,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../abilities/slash.dart';
 
 class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
   bool debugMode = false;
@@ -100,9 +101,11 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
       removeFromParent();
       print("Asteroid destroyed!");
 
-      children.whereType<PolygonHitbox>().forEach((hitbox) {
-        hitbox.removeFromParent();
-      });
+      } else if (other is Slash) {
+      // If the asteroid collides with the slash, destroy the asteroid
+      (gameRef as AsteroidGame).removeAsteroid(this);
+      removeFromParent();
+      print("Asteroid destroyed by slash!");
     }
   }
 
