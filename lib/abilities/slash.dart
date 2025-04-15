@@ -18,6 +18,9 @@ class Slash extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
   // Declare the hitbox variable
   late PolygonHitbox slashHitbox;
 
+  final int activeFrameStart = 1;
+  final double activeFrameEnd = 1.4;
+
   Slash({
     required Vector2 playerPosition,
     required Vector2 playerSize,
@@ -62,6 +65,7 @@ class Slash extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
     ], parentSize: size);
 
     add(slashHitbox);
+    slashHitbox.collisionType = CollisionType.inactive;
   }
 
   @override
@@ -69,6 +73,14 @@ class Slash extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
     super.update(dt);
 
     position += velocity * dt;
+
+    final currentFrame = animationTicker?.currentIndex ?? 0;
+
+    if (currentFrame >= activeFrameStart && currentFrame <= activeFrameEnd){
+      slashHitbox.collisionType = CollisionType.active;
+    } else {
+      slashHitbox.collisionType = CollisionType.inactive;
+    }
 
     // Remove the slash when its animation is done
     if (animationTicker?.done() == true) {
