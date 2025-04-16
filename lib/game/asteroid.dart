@@ -95,16 +95,42 @@ class Asteroid extends SpriteComponent with HasGameRef, CollisionCallbacks {
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
+
+    // Handle collision with the Player
     if (other is Player) {
-      (gameRef as AsteroidGame).removeAsteroid(this);
+      // Store the player's lives before taking damage
+      int previousLivesCount = other.lives;
 
-      removeFromParent();
-      print("Asteroid destroyed!");
+      List<Asteroid> asteroids = (gameRef as AsteroidGame).asteroids;
 
-      } else if (other is Slash) {
-      // If the asteroid collides with the slash, destroy the asteroid
+      // Await the takeDamage method to ensure life count updates before removing the asteroid
+      other.checkCollisions(asteroids).then((_) {
+        // Check if the player's lives have decreased
+        if (other.lives < previousLivesCount) {
+          // Remove the asteroid from the game
+          (gameRef as AsteroidGame).removeAsteroid(this);
+          removeFromParent(); // Remove the asteroid itself
+
+          // Optional: Remove hitboxes if necessary (clean up)
+          children.whereType<PolygonHitbox>().forEach((hitbox) {
+            hitbox.removeFromParent();
+          });
+
+          print("Asteroid destroyed after player lost a life!");
+        }
+      });
+    }
+    // Handle collision with the Slash
+    else if (other is Slash) {
+      // Remove the asteroid from the game
       (gameRef as AsteroidGame).removeAsteroid(this);
-      removeFromParent();
+      removeFromParent(); // Remove the asteroid itself
+
+      // Optional: Remove hitboxes if necessary (clean up)
+      children.whereType<PolygonHitbox>().forEach((hitbox) {
+        hitbox.removeFromParent();
+      });
+
       print("Asteroid destroyed by slash!");
     }
   }

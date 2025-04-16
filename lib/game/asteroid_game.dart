@@ -125,7 +125,7 @@ class AsteroidGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
   }
 
   void _spawnAsteroid() {
-    print("Spawning asteroid...");
+    //print("Spawning asteroid...");
     Asteroid asteroid = Asteroid();
     add(asteroid);
     asteroids.add(asteroid);

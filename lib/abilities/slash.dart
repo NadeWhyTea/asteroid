@@ -19,7 +19,7 @@ class Slash extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
   late PolygonHitbox slashHitbox;
 
   final int activeFrameStart = 1;
-  final double activeFrameEnd = 1.4;
+  final int activeFrameEnd = 3;
 
   Slash({
     required Vector2 playerPosition,

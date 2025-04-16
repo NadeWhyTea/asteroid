@@ -5,7 +5,7 @@ class AsteroidCounter extends TextComponent {
   AsteroidCounter()
       : super(
     text: "Asteroids: 0",
-    position: Vector2(10, 10), // Position on the screen
+    position: Vector2(915, 50), // Position on the screen
     textRenderer: TextPaint(
       style: TextStyle(
         fontSize: 24,

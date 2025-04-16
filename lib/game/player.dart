@@ -55,7 +55,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   final Vector2 cooldownBarSize = Vector2(50, 5); // Width & height
 
   double _blinkTimer = 0.0;
-  double _blinkInterval = 0.15; // Blink every 0.1 seconds
+  final double _blinkInterval = 0.15; // Blink every 0.1 seconds
 
   late CircleHitbox playerHitbox;
 
@@ -198,8 +198,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     // Dynamically boost acceleration when there's input
     double dynamicAcceleration = acceleration;
     if (input.length > 0) {
-      dynamicAcceleration *=
-      1.3; // You can tweak the 1.2 factor to adjust the boost amount
+      dynamicAcceleration *= 1.3; // You can tweak the 1.2 factor to adjust the boost amount
     }
 
     // Smoothly interpolate velocity
@@ -242,8 +241,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
         if (diff.abs() < rotationStep) {
           angle = _driftAngle; // Snap to drift angle
         } else {
-          angle +=
-              rotationStep * (diff > 0 ? 1 : -1); // Rotate toward drift angle
+          angle += rotationStep * (diff > 0 ? 1 : -1); // Rotate toward drift angle
         }
       }
       return;
@@ -279,8 +277,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
       _targetAngle = Math.atan2(input.y, input.x) + Math.pi / 2;
 
       if (_driftAngle != null) {
-        double diff = (_targetAngle - _driftAngle + Math.pi) % (2 * Math.pi) -
-            Math.pi;
+        double diff = (_targetAngle - _driftAngle + Math.pi) % (2 * Math.pi) - Math.pi;
 
         if (diff.abs() > 2.8) {
           rotationSpeed = 20.0; // Sharp direction change
@@ -299,8 +296,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
 
     double rotationStep = rotationSpeed * dt;
     double angleDifference = diff.abs();
-    double rotationMultiplier = Math.min(
-        angleDifference / (Math.pi * 1.66), 1.0);
+    double rotationMultiplier = Math.min(angleDifference / (Math.pi * 1.66), 1.0);
     rotationStep *= (1 + rotationMultiplier);
 
     if (angleDifference < rotationStep) {
@@ -310,13 +306,12 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
     }
   }
 
-  void checkCollisions(List<Asteroid> asteroids) {
+  Future<void> checkCollisions(List<Asteroid> asteroids) async {
     if (_hasCollided || (gameRef as AsteroidGame).isGameOver) return;
 
     for (Asteroid asteroid in asteroids) {
       Vector2 playerCenter = position + Vector2(size.x / 2, size.y / 2);
-      Vector2 asteroidCenter = asteroid.position +
-          Vector2(asteroid.size.x / 2, asteroid.size.y / 2);
+      Vector2 asteroidCenter = asteroid.position + Vector2(asteroid.size.x / 2, asteroid.size.y / 2);
 
       double distance = playerCenter.distanceTo(asteroidCenter);
 
@@ -335,8 +330,7 @@ class Player extends SpriteComponent with HasGameRef, KeyboardHandler, Collision
   }
 
   void takeDamage() {
-    if (_hasCollided || lives <= 0 || (gameRef as AsteroidGame).isGameOver)
-      return;
+    if (_hasCollided || lives <= 0 || (gameRef as AsteroidGame).isGameOver) return;
 
     _hasCollided = true;
     lives--;
