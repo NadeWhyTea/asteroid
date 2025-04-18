@@ -12,7 +12,7 @@ import '../game/asteroid.dart';
 import '../game/asteroid_game.dart';
 
 class Slash extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks {
-  final double slashSpeed = 250;
+  final double slashSpeed = 500;
   late Vector2 velocity;
 
   // Declare the hitbox variable
@@ -51,7 +51,7 @@ class Slash extends SpriteAnimationComponent with HasGameRef, CollisionCallbacks
       slashSprite,
       SpriteAnimationData.sequenced(
         amount: 5,
-        stepTime: 0.08,
+        stepTime: 0.12,
         textureSize: Vector2(1920 / 5, 384), // = Vector2(384, 384) // Adjust based on your sprite sheet
         loop: false,
       ),

@@ -34,6 +34,7 @@ dependencies:
   flutter:
     sdk: flutter
   flame: ^1.25.0
+  flame_audio: ^2.1.1
   gif_view: ^1.0.0
 
   # The following adds the Cupertino Icons font to your application.
@@ -66,6 +67,7 @@ flutter:
     - assets/images/gameBackground.gif
     - assets/images/gameOverBackground.gif
     - assets/images/sprites/slash_spritesheet.png
+    - assets/audio/Dark Castle A.mp3
 
   fonts:
     - family: Orbitron

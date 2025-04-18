@@ -4,6 +4,7 @@ import '../widgets/custom_button.dart';
 import '../styles/button_styles.dart';
 import 'package:flame/game.dart';
 import '../game/asteroid_game.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 class GameScreen extends StatefulWidget {
   @override
@@ -62,6 +63,7 @@ class _GameScreenState extends State<GameScreen> {
               child: CustomButton(
                 text: 'Return to Home',
                 onPressed: () {
+                  FlameAudio.bgm.stop();
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(

@@ -2,9 +2,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/home_screen.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FlameAudio.audioCache.loadAll([
+    'Dark Castle A.mp3',
+  ]);
 
   try {
     // Explicitly provide the FirebaseOptions

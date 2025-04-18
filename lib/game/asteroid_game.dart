@@ -12,6 +12,7 @@ import 'package:firebase_database/firebase_database.dart';
 import '../screens/game_screen.dart';
 import '../widgets/boundary_box.dart';
 import '../widgets/asteroid_counter.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 class AsteroidGame extends FlameGame with KeyboardEvents, HasCollisionDetection {
   final BuildContext context;
@@ -42,6 +43,10 @@ class AsteroidGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
   Future<void> onLoad() async {
     super.onLoad();
     _focusNode.requestFocus();
+
+    FlameAudio.bgm.stop();
+
+    await FlameAudio.bgm.play('Dark Castle A.mp3', volume: 0.4);
 
     _initializeBoundaryBox();
 
@@ -179,6 +184,8 @@ class AsteroidGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
   void _handleGameOver() {
     isGameOver = true;
     _asteroidTimer.stop();
+
+    FlameAudio.bgm.stop();
 
     Navigator.pushReplacement(
       context,
